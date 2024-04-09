@@ -1,18 +1,21 @@
-# install.packages('igraph')
-
-# entrada = scan()
-# entrada2 = readline()
-
-# entrada
-# entrada2
+# Carrega pacotes ----
+## Instala pacote se nao presente
+if (!require(igraph)) {
+    install.packages("igraph")
+    library(igraph)
+}
 
 library(igraph)
 
-trello = read.csv("RedeONI/monitoramentoDemandas.csv")
+# Carrega dados ----
+## Dados brutos ----
+trello_bruto = read.csv("RedeONI/monitoramentoDemandas.csv")
 
-observatorio = trello$Members
+## Membros dos cards ----
+card_membros = trello_bruto$Members
 
-t = purrr::map_dfr(observatorio, 
+## Loop para extracao das relacoes dos membros do card ----
+relacao_bruto = purrr::map_dfr(card_membros, 
                    function(x){
                      y = stringr::str_split(x, ', ')
                      
@@ -26,13 +29,14 @@ t = purrr::map_dfr(observatorio,
                      z
                    })
 
+# Limpeza dos dados ----
+relacao_contagem = dplyr::count(t, colaborador_1, colaborador_2)
+relacao_filtro = dplyr::filter(tt, n > 7)
 
-tt = dplyr::count(t, colaborador_1, colaborador_2)
-ttt = dplyr::filter(tt, n > 7)
-
-tttt = ttt %>% 
+relacao_filtrobinario = ttt %>% 
   dplyr::mutate(n = ifelse(n > 0, 1, 0))
-  
+
+## Gera matriz de colaboradores ----
 matriz_colaboradores =tidyr::pivot_wider(tttt,
                                          names_from = colaborador_2,
                                          values_from = n,
@@ -40,24 +44,18 @@ matriz_colaboradores =tidyr::pivot_wider(tttt,
                                          values_fill = 0
 )
 
+## Ordena matriz 
 matriz_colaboradores = matriz_colaboradores[, c('colaborador_1', as.character(matriz_colaboradores$colaborador_1))]
 
+## Transforma em formato de matriz
 colab = data.matrix(matriz_colaboradores)
 
-#colnames(colab) = rownames(colab) = matriz_colaboradores$colaborador_1
-
+## Remove coluna nao numerica (nomes dos colaboradores
 colab = colab[,-1]
 
+## Transforma em rede
 network = graph_from_adjacency_matrix(colab)
 
+# Avaliacao e Visualizacao
+## Grafico da rede
 plot(network)
-
-# graph = layout_in_circle(network)
-# plot(network, layout = graph)
-
-
-# gd = graph(c(observatorio))
-# plot(gd)
-# 
-# gu = graph(c(observatorio), directed=FALSE)
-# plot(gu, vertex.label =NA)
