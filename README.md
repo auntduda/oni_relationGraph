@@ -1,2 +1,3 @@
-# oni_relationGraph
-Repo to visually demonstrate the relations we have at the Observatório Nacional da Indústria using the R language
+# Observatório Nacional da Indústria em R
+
+Este repositório armazena o script utilizado para produzir uma visualização estática das relações de vínculo estabelecidas no Observatório Nacional da Indústria. As informações são extraídas a partir da platafroma Trello, por meio de um arquivo ``.csv``
