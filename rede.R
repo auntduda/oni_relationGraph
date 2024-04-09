@@ -1,8 +1,8 @@
 # Carrega pacotes ----
 ## Instala pacote se nao presente
 if (!require(igraph)) {
-    install.packages("igraph")
-    library(igraph)
+  install.packages("igraph")
+  library(igraph)
 }
 
 library(igraph)
@@ -16,28 +16,28 @@ card_membros = trello_bruto$Members
 
 ## Loop para extracao das relacoes dos membros do card ----
 relacao_bruto = purrr::map_dfr(card_membros, 
-                   function(x){
-                     y = stringr::str_split(x, ', ')
-                     
-                     y = unlist(y)
-                     
-                     z = expand.grid(colaborador_1 = y,
-                                     colaborador_2 = y)
-                     
-                     z = z[z$colaborador_1 != z$colaborador_2,]
-                     
-                     z
-                   })
+                               function(x){
+                                 y = stringr::str_split(x, ', ')
+                                 
+                                 y = unlist(y)
+                                 
+                                 z = expand.grid(colaborador_1 = y,
+                                                 colaborador_2 = y)
+                                 
+                                 z = z[z$colaborador_1 != z$colaborador_2,]
+                                 
+                                 z
+                               })
 
 # Limpeza dos dados ----
-relacao_contagem = dplyr::count(t, colaborador_1, colaborador_2)
-relacao_filtro = dplyr::filter(tt, n > 7)
+relacao_contagem = dplyr::count(relacao_bruto, colaborador_1, colaborador_2)
+relacao_filtro = dplyr::filter(relacao_contagem, n > 0)
 
-relacao_filtrobinario = ttt %>% 
+relacao_binario = relacao_filtro %>% 
   dplyr::mutate(n = ifelse(n > 0, 1, 0))
 
 ## Gera matriz de colaboradores ----
-matriz_colaboradores =tidyr::pivot_wider(tttt,
+matriz_colaboradores =tidyr::pivot_wider(relacao_filtro,
                                          names_from = colaborador_2,
                                          values_from = n,
                                          values_fn = ~sum(.x, na.rm = TRUE),
@@ -54,8 +54,13 @@ colab = data.matrix(matriz_colaboradores)
 colab = colab[,-1]
 
 ## Transforma em rede
-network = graph_from_adjacency_matrix(colab)
+network = graph_from_adjacency_matrix(colab, weighted = TRUE, mode = c("undirected"))
+
+layout_grafico = layout_with_fr(network)
 
 # Avaliacao e Visualizacao
 ## Grafico da rede
 plot(network)
+plot(network, layout= layout_grafico)
+
+     
