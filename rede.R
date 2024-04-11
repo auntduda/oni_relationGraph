@@ -66,7 +66,7 @@ layout_grafico = layout_as_star(network)
 
 plot(
   network,
-  layout = layout_with_dh(network),
+  layout = layout_grafico,
   vertex.size = log(colSums(colab), 1.5),
   edge.arrow.size = 500,
   vertex.label.cex = 0.8,
@@ -78,7 +78,15 @@ plot(
   vertex.label = ifelse(colSums(colab) > 100 , colnames(colab), NA)
 )
 
+# Clusterizando grupos
+## Construcao e Plot dos Clusteres do Observatorio
+
+cluster = cluster_label_prop(network)
+
+plot(cluster, network)
+
 ## Testes
+
 # colSums(colab)
 # 
 # contagem = relacao_contagem %>% 
@@ -91,5 +99,3 @@ plot(
 #   coord_flip()
 
 # plot(network, layout= layout_grafico)
-
-     
