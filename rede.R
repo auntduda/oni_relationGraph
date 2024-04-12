@@ -78,12 +78,64 @@ plot(
   vertex.label = ifelse(colSums(colab) > 100 , colnames(colab), NA)
 )
 
-# Clusterizando grupos
-## Construcao e Plot dos Clusteres do Observatorio
+# 1.1 - Para cada integrante avalie as 3 pessoas que mais interagem com eles e depois fazer um gráfico dos 5 colaboradores com mais conexões
+
+
+
+# 1.2 - Avaliar a distribuição dos integrantes com mais conexões;
+
+
+
+# 1.3 - Criar medida de centralidade de cada integrante , considerando a rede pura e outra tornando a rede mais esparsa
+## Rede pura
+
+
+
+## Rese esparsa
+
+
+
+# 1.4 - Gerar avaliacao de clusters da rede, considerando a rede pura e outra tornando a rede mais esparsa
+## Rede pura
 
 cluster = cluster_label_prop(network)
 
 plot(cluster, network)
+
+## Rede esparsa
+
+
+
+
+# 1.5 - Qual eh a dispersao de interacoes desta pessoa com outros colaboradores? Quanto mais disperso, menor a proporcao
+
+rel = relacao_contagem %>% 
+  rename(vinculos = n) %>% 
+  group_by(colaborador_1) %>% 
+  mutate(prop = vinculos/sum(vinculos)) %>% 
+  slice_max(prop, n = 3) %>% 
+  summarise(prop = sum(prop))
+
+rela = arrange(rel, prop)
+
+ggplot(rela, aes(x = fct_reorder(colaborador_1, prop), y = prop)) +
+  geom_col() +
+  coord_flip()
+
+# 1.6 - Quantas vezes essa pessoa eh o elo principal entre outros colaboradores?
+
+ranksklva = relacao_contagem %>%
+  rename(vinculos = n) %>% 
+  group_by(colaborador_1) %>% 
+  slice_max(order_by = vinculos, n = 3) %>% 
+  ungroup() %>% 
+  count(colaborador_2)
+
+ggplot(ranksklva, aes(x = fct_reorder(colaborador_2, n), y = n)) +
+  geom_col() +
+  coord_flip()
+
+########################################################################################################
 
 ## Testes
 
@@ -99,3 +151,5 @@ plot(cluster, network)
 #   coord_flip()
 
 # plot(network, layout= layout_grafico)
+
+     
