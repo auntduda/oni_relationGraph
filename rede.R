@@ -61,8 +61,8 @@ network = graph_from_adjacency_matrix(colab, weighted = TRUE, mode = c("undirect
 
 layout_grafico = layout_as_star(network)
 
-# Avaliacao e Visualizacao
-## Grafico da rede
+# Avaliacao e Visualizacao ----
+## Grafico da rede ----
 
 plot(
   network,
@@ -78,36 +78,47 @@ plot(
   vertex.label = ifelse(colSums(colab) > 100 , colnames(colab), NA)
 )
 
-# 1.1 - Para cada integrante avalie as 3 pessoas que mais interagem com eles e depois fazer um gráfico dos 5 colaboradores com mais conexões
+## - Gráfico dos 5 colaboradores com mais conexões ----
+
+cols = data.frame(cols) %>% tibble::rownames_to_column() %>% arrange(-cols)
+
+c = cols[1:5, ]
+
+# View(c)
+
+ggplot(c, aes(x = fct_reorder(rowname, cols), y = cols)) +
+  geom_col() +
+  coord_flip() +
+  labs(title = "Quantas conexoes possui cada colaborador?", x = "Conexoes", y = "Colaboradores")
+
+## - Para cada integrante avalie as 3 pessoas que mais interagem com eles ----
+
+## - Avaliar a distribuição dos integrantes com mais conexões; ----
 
 
 
-# 1.2 - Avaliar a distribuição dos integrantes com mais conexões;
+## Criar medida de centralidade de cada integrante , considerando a rede pura e outra tornando a rede mais esparsa ----
+### Rede pura ----
 
 
 
-# 1.3 - Criar medida de centralidade de cada integrante , considerando a rede pura e outra tornando a rede mais esparsa
-## Rede pura
+### Rese esparsa ----
 
 
 
-## Rese esparsa
-
-
-
-# 1.4 - Gerar avaliacao de clusters da rede, considerando a rede pura e outra tornando a rede mais esparsa
-## Rede pura
+## - Gerar avaliacao de clusters da rede, considerando a rede pura e outra tornando a rede mais esparsa ----
+### Rede pura ----
 
 cluster = cluster_label_prop(network)
 
 plot(cluster, network)
 
-## Rede esparsa
+### Rede esparsa ----
 
 
 
 
-# 1.5 - Qual eh a dispersao de interacoes desta pessoa com outros colaboradores? Quanto mais disperso, menor a proporcao
+## Qual eh a dispersao de interacoes desta pessoa com outros colaboradores? Quanto mais disperso, menor a proporcao ----
 
 rel = relacao_contagem %>% 
   rename(vinculos = n) %>% 
@@ -122,7 +133,7 @@ ggplot(rela, aes(x = fct_reorder(colaborador_1, prop), y = prop)) +
   geom_col() +
   coord_flip()
 
-# 1.6 - Quantas vezes essa pessoa eh o elo principal entre outros colaboradores?
+## Quantas vezes essa pessoa eh o elo principal entre outros colaboradores? ----
 
 ranksklva = relacao_contagem %>%
   rename(vinculos = n) %>% 
@@ -135,9 +146,8 @@ ggplot(ranksklva, aes(x = fct_reorder(colaborador_2, n), y = n)) +
   geom_col() +
   coord_flip()
 
-########################################################################################################
 
-## Testes
+# Testes ----
 
 # colSums(colab)
 # 
@@ -151,5 +161,3 @@ ggplot(ranksklva, aes(x = fct_reorder(colaborador_2, n), y = n)) +
 #   coord_flip()
 
 # plot(network, layout= layout_grafico)
-
-     
