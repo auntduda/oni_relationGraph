@@ -11,7 +11,8 @@ if (!require(tidyverse)) {
 }
 
 if (!require(arcdiagram)) {
-  install.packages("arcdiagram")
+  install.packages("remotes")
+  remotes::install_github("gastonstat/arcdiagram")
   library(arcdiagram)
 }
 
@@ -54,6 +55,7 @@ matriz_colaboradores =tidyr::pivot_wider(relacao_filtro,
 
 ## Ordena matriz 
 matriz_colaboradores = matriz_colaboradores[, c('colaborador_1', as.character(matriz_colaboradores$colaborador_1))]
+
 matriz_colaboradores = matriz_colaboradores[, 2:30]
 
 ## Transforma em formato de matriz
@@ -66,7 +68,7 @@ colab = data.matrix(matriz_colaboradores)
 ## Transforma em rede
 network = graph_from_adjacency_matrix(colab, weighted = TRUE, mode = c("undirected"))
 
-layout_grafico = layout_as_star(network)
+layout_grafico = layout_with_dh(network)
 
 # Avaliacao e Visualizacao ----
 ## Grafico da rede ----
@@ -87,11 +89,11 @@ plot(
 
 ## - Gráfico dos 5 colaboradores com mais conexões ----
 
-# cols = matriz_colaboradores[order(matriz_colaboradores[1:5,])]
+cols = colSums(colab)
 
 col = data.frame(cols) %>% tibble::rownames_to_column() %>% arrange(-cols)
 
-c = cols[1:5, ]
+c = col[1:5, ]
 
 # View(c)
 
@@ -116,8 +118,7 @@ for (i in seq_along(matriz_2x2$colaborador_1))  {
   
 }
 
-# deafult arcplot
-arcplot(as.matrix(matriz_2x2), lwd.arcs = 0.2 * valores, cex.labels=0.44, sorted=TRUE, col.arcs=hsv(runif(9,0.6,0.8),alpha=0.3))
+arcplot(as.matrix(matriz_2x2), lwd.arcs = 0.2 * valores, cex.labels=0.7, sorted=TRUE, col.arcs=hsv(runif(9,0.6,0.8),alpha=0.3))
 
 ## - Avaliar a distribuição dos integrantes com mais conexões; ----
 
