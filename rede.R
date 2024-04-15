@@ -5,7 +5,15 @@ if (!require(igraph)) {
   library(igraph)
 }
 
-library(igraph)
+if (!require(tidyverse)) {
+  install.packages("tidyverse")
+  library(tidyverse)
+}
+
+if (!require(arcdiagram)) {
+  install.packages("arcdiagram")
+  library(arcdiagram)
+}
 
 # Carrega dados ----
 ## Dados brutos ----
@@ -15,19 +23,18 @@ trello_bruto = read.csv("RedeONI/monitoramentoDemandas.csv")
 card_membros = trello_bruto$Members
 
 ## Loop para extracao das relacoes dos membros do card ----
-relacao_bruto = purrr::map_dfr(card_membros, 
-                               function(x){
-                                 y = stringr::str_split(x, ', ')
-                                 
-                                 y = unlist(y)
-                                 
-                                 z = expand.grid(colaborador_1 = y,
-                                                 colaborador_2 = y)
-                                 
-                                 z = z[z$colaborador_1 != z$colaborador_2,]
-                                 
-                                 z
-                               })
+relacao_bruto = purrr::map_dfr(
+  card_membros,
+  function(x) {
+    y = stringr::str_split(x, ', ')
+    y = unlist(y)
+    
+    z = expand.grid(colaborador_1 = y,
+                    colaborador_2 = y)
+    z = z[z$colaborador_1 != z$colaborador_2, ]
+    
+    return(z)
+    })
 
 # Limpeza dos dados ----
 relacao_contagem = dplyr::count(relacao_bruto, colaborador_1, colaborador_2)
@@ -80,7 +87,9 @@ plot(
 
 ## - Gráfico dos 5 colaboradores com mais conexões ----
 
-cols = data.frame(cols) %>% tibble::rownames_to_column() %>% arrange(-cols)
+# cols = matriz_colaboradores[order(matriz_colaboradores[1:5,])]
+
+col = data.frame(cols) %>% tibble::rownames_to_column() %>% arrange(-cols)
 
 c = cols[1:5, ]
 
@@ -92,6 +101,23 @@ ggplot(c, aes(x = fct_reorder(rowname, cols), y = cols)) +
   labs(title = "Quantas conexoes possui cada colaborador?", x = "Conexoes", y = "Colaboradores")
 
 ## - Para cada integrante avalie as 3 pessoas que mais interagem com eles ----
+
+valores = seq_along(matriz_2x2$colaborador_1)
+
+for (i in seq_along(matriz_2x2$colaborador_1))  {
+  colaborar_1_sel = as.character(matriz_2x2$colaborador_1[i])
+  colaborar_2_sel = as.character(matriz_2x2$colaborador_2[i])
+  
+  y = relacao_contagem[relacao_contagem$colaborador_1 == colaborar_1_sel & relacao_contagem$colaborador_2 == colaborar_2_sel,]
+  
+  z = y$n
+  
+  valores[i] = z
+  
+}
+
+# deafult arcplot
+arcplot(as.matrix(matriz_2x2), lwd.arcs = 0.2 * valores, cex.labels=0.44, sorted=TRUE, col.arcs=hsv(runif(9,0.6,0.8),alpha=0.3))
 
 ## - Avaliar a distribuição dos integrantes com mais conexões; ----
 
