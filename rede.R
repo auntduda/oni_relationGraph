@@ -61,10 +61,6 @@ matriz_colaboradores = matriz_colaboradores[, 2:30]
 ## Transforma em formato de matriz
 colab = data.matrix(matriz_colaboradores)
 
-## Remove coluna nao numerica (nomes dos colaboradores)
-# colab = rbind(colab, c(-1))
-# colab = colab[,-1]
-
 ## Transforma em rede
 network = graph_from_adjacency_matrix(colab, weighted = TRUE, mode = c("undirected"))
 
@@ -95,8 +91,6 @@ col = data.frame(cols) %>% tibble::rownames_to_column() %>% arrange(-cols)
 
 c = col[1:5, ]
 
-# View(c)
-
 ggplot(c, aes(x = fct_reorder(rowname, cols), y = cols)) +
   geom_col() +
   coord_flip() +
@@ -124,7 +118,7 @@ arcplot(as.matrix(matriz_2x2), lwd.arcs = 0.2 * valores, cex.labels=0.7, sorted=
 
 
 
-## Criar medida de centralidade de cada integrante , considerando a rede pura e outra tornando a rede mais esparsa ----
+## Criar medida de centralidade de cada integrante, considerando a rede pura e outra tornando a rede mais esparsa ----
 ### Rede pura ----
 
 
@@ -172,6 +166,9 @@ ranksklva = relacao_contagem %>%
 ggplot(ranksklva, aes(x = fct_reorder(colaborador_2, n), y = n)) +
   geom_col() +
   coord_flip()
+
+## Relação de Cards Não-Concluidos ----
+
 
 
 # Testes ----
