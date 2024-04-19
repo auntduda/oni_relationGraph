@@ -18,7 +18,7 @@ if (!require(arcdiagram)) {
 
 # Carrega dados ----
 ## Dados brutos ----
-trello_bruto = read.csv("RedeONI/monitoramentoDemandas.csv")
+trello_bruto = read.csv("RedeONI/monitoramentoDemandas.csv", encoding = 'UTF-8')
 
 ## Membros dos cards ----
 card_membros = trello_bruto$Members
@@ -98,6 +98,12 @@ ggplot(c, aes(x = fct_reorder(rowname, cols), y = cols)) +
 
 ## - Para cada integrante avalie as 3 pessoas que mais interagem com eles ----
 
+# matriz_2x2 = como ela era?
+# 
+# matriz_2x2
+# colaborador_1 x colaborador_2
+# quem tem relacao com quem e cada linha so aparece 1x pra cada relacao
+
 valores = seq_along(matriz_2x2$colaborador_1)
 
 for (i in seq_along(matriz_2x2$colaborador_1))  {
@@ -169,6 +175,22 @@ ggplot(ranksklva, aes(x = fct_reorder(colaborador_2, n), y = n)) +
 
 ## Relação de Cards Não-Concluidos ----
 
+status_colab = trello_bruto[,c("Members", "List.Name")]
+
+r1 = status_colab %>%
+  separate_rows(Members, sep = ",\\s*")
+  
+r2 = r1 %>%
+  group_by(Members, List.Name) %>%
+  count()
+
+r3 = r2 %>%
+  rename(count = n, status = List.Name, colab = Members) %>%
+  filter((colab != "" | is.na(colab)==TRUE) & (status != "" | is.na(status)==TRUE))
+
+nao_concluidos = r3 %>% 
+              filter(status != "Concluído")
+  
 
 
 # Testes ----
