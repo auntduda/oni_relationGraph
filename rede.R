@@ -16,6 +16,16 @@ if (!require(arcdiagram)) {
   library(arcdiagram)
 }
 
+if (!require(ggbipart)) {
+  remotes::install_github("pedroj/bipartite_plots")
+  library(ggbipart)
+}
+
+if (!require(bipartite)) {
+  install.packages("bipartite")
+  library(bipartite)
+}
+
 # Carrega dados ----
 ## Dados brutos ----
 trello_bruto = read.csv("RedeONI/monitoramentoDemandas.csv", encoding = 'UTF-8')
@@ -129,7 +139,7 @@ arcplot(as.matrix(matriz_2x2), lwd.arcs = 0.2 * valores, cex.labels=0.7, sorted=
 
 
 
-### Rese esparsa ----
+### Rede esparsa ----
 
 
 
@@ -173,7 +183,7 @@ ggplot(ranksklva, aes(x = fct_reorder(colaborador_2, n), y = n)) +
   geom_col() +
   coord_flip()
 
-## Relação de Cards Não-Concluidos ----
+## Relacao de Cards Nao-Concluidos e Colaboradores ----
 
 status_colab = trello_bruto[,c("Members", "List.Name")]
 
@@ -186,11 +196,36 @@ r2 = r1 %>%
 
 r3 = r2 %>%
   rename(count = n, status = List.Name, colab = Members) %>%
-  filter((colab != "" | is.na(colab)==TRUE) & (status != "" | is.na(status)==TRUE))
+  filter((colab != "" | is.na(colab)==TRUE) & (status != "" | is.na(status)==TRUE)) %>% 
+  filter(status != "Concluído") %>% 
+  pivot_wider(names_from = status, values_from = count, values_fill = 0)
 
-nao_concluidos = r3 %>% 
-              filter(status != "Concluído")
-  
+rownames(r3) = r3$colab
+ 
+grafo = bip_railway(r3, label = T)
+ 
+grafo+ coord_flip()
+
+# Testes
+
+# grafo2 = bip_init_network(as.matrix(r3))
+# 
+# bip_ggnet(grafo2, as.matrix(r3),
+#           #  color= "mode", palette = col,
+#           edge.label = TRUE,
+#           label= TRUE)
+# 
+# grafo3 = graph.data.frame(r3, directed = FALSE)
+# 
+# bipartite.mapping(grafo3)
+# 
+# V(grafo3)$type = bipartite_mapping(grafo3)$type
+# 
+# V(grafo3)$size = degree(r3)
+# 
+# projetado = bipartite_projection(grafo3, multiplicity = TRUE)
+# 
+# plot(projetado)
 
 
 # Testes ----
