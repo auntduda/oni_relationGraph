@@ -26,6 +26,21 @@ if (!require(bipartite)) {
   library(bipartite)
 }
 
+if (!require(tnet)) {
+  install.packages("tnet", dependencies=TRUE)
+  library(tnet)
+}
+
+if (!require(ggplot2)) {
+  install.packages("ggplot2")
+  library(ggplot2)
+}
+
+if (!require(hrbrthemes)) {
+  install.packages("hrbrthemes")
+  library(hrbrthemes)
+}
+
 # Carrega dados ----
 ## Dados brutos ----
 trello_bruto = read.csv("RedeONI/monitoramentoDemandas.csv", encoding = 'UTF-8')
@@ -132,15 +147,42 @@ arcplot(as.matrix(matriz_2x2), lwd.arcs = 0.2 * valores, cex.labels=0.7, sorted=
 
 ## - Avaliar a distribuição dos integrantes com mais conexões; ----
 
+dist = relacao_contagem %>% 
+  group_by(colaborador_1) %>% 
+  rename(vinculos = n) %>% 
+  slice_max(vinculos, n=3, with_ties = FALSE)
 
+ggplot(dist, aes(x=dist$colaborador_1, y=dist$colaborador_2, size=dist$vinculos)) + 
+  geom_point(color="darkred") +
+  ggtitle("Quantas interacoes cada colaborador tem com seu top 3") +
+  theme_ipsum()
 
 ## Criar medida de centralidade de cada integrante, considerando a rede pura e outra tornando a rede mais esparsa ----
 ### Rede pura ----
 
+#### Gerando os graus de cada no ----
+# tm = get.edgelist(network, names=FALSE)
+# 
+# nodeLabels = V(network)$name
+# 
+# mt = tm[, c(2,1)]
+# 
+# deg_tm = degree_tm(tm)
+# 
+# deg_mt = degree_tm(mt)
 
+igraph::degree(network)
+
+#### Gerando um dataframe de centralidade em relacao ao quao central eh cada no da network - o quanto aquele no eh ponte da network ----
+igraph::betweenness(network)
+
+#### Gerando um dataframe de centralidade em relacao ao quanto cada no eh central dentro da rede ----
+igraph::closeness(network, normalized = TRUE)
 
 ### Rede esparsa ----
 
+#### Gerando um dataframe de centralidade em relacao ao quanto cada no eh central dentro das redes que temos no observatorio, ja que algumas delas sao desconexas - clusters ----
+igraph::harmonic_centrality(network)
 
 
 ## - Gerar avaliacao de clusters da rede, considerando a rede pura e outra tornando a rede mais esparsa ----
